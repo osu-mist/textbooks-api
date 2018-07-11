@@ -4,14 +4,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 
 class Textbook {
     @JsonIgnore
-    Integer id
+    String id
     String isbn
-    String required
+    Boolean isRequired
     String coverImageUrl
     String title
     String author
-    String edition
-    String copyright_year
-    String priceNew
-    String priceUsed
+    Integer edition
+    Integer copyright_year
+    Float priceNewUSD
+    Float priceUsedUSD
 }
