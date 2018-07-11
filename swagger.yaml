@@ -66,15 +66,15 @@ paths:
           type: "string"
           required: true
 
-        - name: "department"
+        - name: "subject"
           in: "query"
-          description: "Name of department in which to find textbooks"
+          description: "Name of course subject in which to find textbooks"
           type: "string"
           required: true
 
-        - name: "course"
+        - name: "courseNumber"
           in: "query"
-          description: "Name of course in which to find textbooks"
+          description: "Number of course in which to find textbooks"
           type: "string"
           required: true
 
@@ -87,7 +87,7 @@ paths:
         - name: "isRequired"
           in: "query"
           description: "If true, only retrieves required textbooks"
-          type: "string"
+          type: "boolean"
           required: false
           default: false
 
@@ -114,10 +114,10 @@ definitions:
         type: "string"
         description: "ISBN of textbook"
         example: "9780998819112"
-      required:
-        type: "string"
-        description: "Required status of textbook"
-        example: "Required"
+      isRequired:
+        type: "boolean"
+        description: "Indicates whether textbook is required or not"
+        example: true
       coverImageUrl:
         type: "string"
         description: "URL of cover image"
@@ -131,21 +131,23 @@ definitions:
         description: "Author of textbook"
         example: "Devore"
       edition:
-        type: "string"
+        type: "integer"
         description: "Textbook edition"
-        example: "9"
+        example: 9
       copyright_year:
-        type: "string"
+        type: "integer"
         description: "Textbook copyright year"
-        example: "2016"
-      priceNew:
-        type: "string"
+        example: 2016
+      priceNewUSD:
+        type: "number"
+        format: "float"
         description: "Price to buy new textbook at Beaver Store"
-        example: "$49.00"
-      priceUsed:
-        type: "string"
+        example: 49.00
+      priceUsedUSD:
+        type: "number"
+        format: "float"
         description: "Price to buy used textbook at Beaver Store"
-        example: "$36.75"
+        example: 36.75
 
   TextbookResource:
     type: "object"
@@ -153,7 +155,7 @@ definitions:
         id:
           type: "string"
           description: "ID of textbook given by section id and textbook ISBN"
-          example: "2018-Fall__ST__314__002__9780998819112"
+          example: "2018-Fall-ST-314-002-9780998819112"
         type:
           type: "string"
           default: "textbook"
@@ -189,7 +191,7 @@ definitions:
         type: "string"
         format: "url"
         description: "Self link of resource"
-        example: "https://api.oregonstate.edu/v1/textbooks/2018-Fall__ST__314__002__9780998819112"
+        example: "https://api.oregonstate.edu/v1/textbooks/2018-Fall-ST-314-002-9780998819112"
 
   Error:
     type: "object"
