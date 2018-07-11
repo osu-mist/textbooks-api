@@ -86,10 +86,9 @@ paths:
 
         - name: "isRequired"
           in: "query"
-          description: "If true, only retrieves required textbooks"
+          description: "If true, only retrieves required textbooks. If false, only retrieves non-required textbooks."
           type: "boolean"
           required: false
-          default: false
 
       responses:
         200:
