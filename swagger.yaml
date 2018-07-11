@@ -1,75 +1,208 @@
-swagger: '2.0'
+swagger: "2.0"
+
 info:
-  title: Web API Skeleton
-  description: Skeleton for Dropwizard Web APIs
-  version: '0.0'
-  license:
-    name: GNU Affero General Public License Version 3
-    url: http://www.gnu.org/licenses/agpl-3.0.en.html
-externalDocs:
-  description: GitHub Repository
-  url: https://github.com/osu-mist/web-api-skeleton
-host: localhost
+  description: "This API allows users to view information on textbooks associated with course sections."
+  version: "1.0"
+  title: "Textbooks API"
+
+tags:
+- name: "textbooks"
+  description: "Contains information on textbooks"
+
 schemes:
-  - http
-basePath: /api/v0
-consumes:
-  - text/plain
+- "https"
+
+host: "api.oregonstate.edu"
+
+basePath: "/v1"
+
+externalDocs:
+  description: "GitHub Repository"
+  url: "https://github.com/osu-mist/textbooks-api"
+
 produces:
-  - text/plain
+  - "application/json"
+
 paths:
-  /:
+
+  /textbooks/{id}:
     get:
-      summary: Get information
-      description: Build and runtime information about the application.
+      tags:
+      - "textbooks"
+      summary: "Retrieve textbooks by ID"
+      operationId: "getTextbooksById"
       parameters:
-        - $ref: '#/parameters/pretty'
+        - name: "id"
+          in: "path"
+          description: "Textbook ID"
+          required: true
+          type: "string"
+
       responses:
         200:
-          description: Object containing information
+          description: "Textbook successfully retrieved"
           schema:
-            $ref: '#/definitions/Info'
+            $ref: "#/definitions/TextbookResult"
+        404:
+          description: "Textbook not found"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/Error"
 
-parameters:
-  pretty:
-    name: pretty
-    in: query
-    type: boolean
-    required: false
-    description: If true, JSON response will be pretty-printed
+  /textbooks:
+    get:
+      tags:
+      - "textbooks"
+      summary: "Retrieve textbooks by parameters"
+      operationId: "getTextbooks"
+      parameters:
+
+        - name: "term"
+          in: "query"
+          description: "Name of term in which to find textbooks"
+          type: "string"
+          required: true
+
+        - name: "department"
+          in: "query"
+          description: "Name of department in which to find textbooks"
+          type: "string"
+          required: true
+
+        - name: "course"
+          in: "query"
+          description: "Name of course in which to find textbooks"
+          type: "string"
+          required: true
+
+        - name: "section"
+          in: "query"
+          description: "Name of section in which to find textbooks"
+          type: "string"
+          required: false
+
+        - name: "isRequired"
+          in: "query"
+          description: "If true, only retrieves required textbooks"
+          type: "string"
+          required: false
+          default: false
+
+      responses:
+        200:
+          description: "Textbooks successfully retrieved"
+          schema:
+            $ref: "#/definitions/TextbookResultArray"
+        400:
+          description: "Bad request"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/Error"
 
 definitions:
-  Info:
+
+  Textbook:
+    type: "object"
     properties:
-      name:
-        type: string
-        description: Name of the API.
-      time:
-        type: string
-        description: Build time in ISO 8601 format.
-      unixTime:
-        type: integer
-        description: Build time as milliseconds since the unix epoch.
-      commit:
-        type: string
-        description: Git commit hash of the revision which was built.
-      documentation:
-        type: string
-        description: Filename of the swagger specification for the API.
+      isbn:
+        type: "string"
+        description: "ISBN of textbook"
+        example: "9780998819112"
+      required:
+        type: "string"
+        description: "Required status of textbook"
+        example: "Required"
+      coverImageUrl:
+        type: "string"
+        description: "URL of cover image"
+        example: "coverimages.verbacompete.com/no_image.jpg"
+      title:
+        type: "string"
+        description: "Title of textbook"
+        example: "Probability & Stat For Engr & Sci"
+      author:
+        type: "string"
+        description: "Author of textbook"
+        example: "Devore"
+      edition:
+        type: "string"
+        description: "Textbook edition"
+        example: "9"
+      copyright_year:
+        type: "string"
+        description: "Textbook copyright year"
+        example: "2016"
+      priceNew:
+        type: "string"
+        description: "Price to buy new textbook at Beaver Store"
+        example: "$49.00"
+      priceUsed:
+        type: "string"
+        description: "Price to buy used textbook at Beaver Store"
+        example: "$36.75"
+
+  TextbookResource:
+    type: "object"
+    properties:
+        id:
+          type: "string"
+          description: "ID of textbook given by section id and textbook ISBN"
+          example: "2018-Fall__ST__314__002__9780998819112"
+        type:
+          type: "string"
+          default: "textbook"
+        attributes:
+          $ref: "#/definitions/Textbook"
+        links:
+          $ref: "#/definitions/Links"
+
+  TextbookResult:
+    type: "object"
+    properties:
+      links:
+        type: "object"
+        default: null
+      data:
+        $ref: "#/definitions/TextbookResource"
+
+  TextbookResultArray:
+    type: "object"
+    properties:
+      links:
+        type: "object"
+        default: null
+      data:
+        type: "array"
+        items:
+          $ref: "#/definitions/TextbookResource"
+
+  Links:
+    type: "object"
+    properties:
+      self:
+        type: "string"
+        format: "url"
+        description: "Self link of resource"
+        example: "https://api.oregonstate.edu/v1/textbooks/2018-Fall__ST__314__002__9780998819112"
+
   Error:
+    type: "object"
     properties:
       status:
-        type: integer
-        description: HTTP status code.
-      developerMessage:
-        type: string
-        description: An error string aimed at developers.
-      userMesage:
-        type: string
-        description: An error string aimed at end users.
+        type: "integer"
+        description: "HTTP status code"
+        example: 123
       code:
-        type: integer
-        description: Error code.
-      details:
-        type: string
-        description: A link to further information about the error.
+        type: "integer"
+        description: "Specific error code"
+        example: 1234
+      detail:
+        type: "string"
+        description: "Link to further information on error code"
+        example: "https://developer.oregonstate.edu/documentation/error-reference#1234"
