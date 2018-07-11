@@ -1,6 +1,26 @@
-# Web API Skeleton
+# Textbooks API
 
-Skeleton for Dropwizard Web APIs.
+Allows users to retrieve information on textbooks for different classes.
+
+## Endpoints
+
+### /textbooks/{id}
+
+#### GET
+
+Retrieve a textbook based on its id. Id contains section ID followed by ISBN of textbook.
+
+Example: `/textbooks/2018-Fall__ST__314__002__9780998819112`
+
+### /textbooks
+
+#### GET
+
+Retrieve textbooks based on parameters.
+
+# Skeleton
+
+This project is based on the [Web API Skeleton](https://github.com/osu-mist/web-api-skeleton).
 
 ## Generate Keys
 
@@ -97,115 +117,3 @@ Run the project:
 ```
 $ gradle run
 ```
-
-## Contrib Files
-
-Any code that contains intellectual property from a vendor should be stored in Github Enterprise instead of public Github. Make the name of the contrib repo in Github Enterprise follow this format using archivesBaseName in gradle.properties.
-
-```
-archivesBaseName-contrib
-```
-
-Set the value of getContribFiles to yes in gradle.properties.
-
-```
-getContribFiles=yes
-```
-
-Also set the value of contribCommit to the SHA1 of the desired commit to be used from the contrib repository.
-
-```
-contribCommit={SHA1}
-```
-
-Files in a Github Enterprise repo will be copied to this directory upon building the application.
-
-```
-$ gradle build
-```
-
-Contrib files are copied to:
-
-```
-/src/main/groovy/edu/oregonstate/mist/contrib/
-```
-
-## Base a New Project off the Skeleton
-
-Clone the skeleton:
-
-```
-$ git clone --origin skeleton git@github.com:osu-mist/web-api-skeleton.git my-api
-$ cd my-api
-```
-
-Rename the webapiskeleton package and SkeletonApplication class:
-
-```
-$ git mv src/main/groovy/edu/oregonstate/mist/webapiskeleton src/main/groovy/edu/oregonstate/mist/myapi
-$ vim src/main/groovy/edu/oregonstate/mist/myapi/SkeletonApplication.class
-```
-
-Update gradle.properties with your package name and main class.
-
-Replace swagger.yaml with your own API specification.
-
-Update configuration-example.yaml as appropriate for your application.
-
-Update the resource examples at the end of this readme.
-
-## Base an Existing Project off the Skeleton
-
-Add the skeleton as a remote:
-
-```
-$ git remote add skeleton git@github.com:osu-mist/web-api-skeleton.git
-$ git fetch skeleton
-```
-
-Merge the skeleton into your codebase:
-
-```
-$ git checkout feature/abc-123-branch
-$ git merge skeleton/master
-...
-$ git commit -v
-```
-
-## Incorporate Updates from the Skeleton
-
-Fetch updates from the skeleton:
-
-```
-$ git fetch skeleton
-```
-
-Merge the updates into your codebase as before.
-Note that changes to CodeNarc configuration may introduce build failures.
-
-```
-$ git checkout feature/abc-124-branch
-$ git merge skeleton/master
-...
-$ git commit -v
-```
-
-## Resources
-
-The Web API definition is contained in the [Swagger specification](swagger.yaml).
-
-The following examples demonstrate the use of `curl` to make authenticated HTTPS requests.
-
-### GET /
-
-This resource returns build and runtime information:
-
-    $ curl \
-    > --cacert doej.pem \
-    > --user "username:password" \
-    > https://localhost:8080/api/v0/
-    {"name":"web-api-skeleton","time":"2016-08-02 14:37:01-0700","unixTime":1470173821035,"commit":"e3d396e","documentation":"swagger.yaml"}
-
-NOTE: you should only specify a certificate with --cacert for local testing.
-Production servers should use a real certificate
-issued by a valid certificate authority.
