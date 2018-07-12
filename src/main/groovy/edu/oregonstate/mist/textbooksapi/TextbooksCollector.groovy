@@ -14,12 +14,12 @@ import org.apache.http.util.EntityUtils
 class TextbooksCollector {
 
     static List<Textbook> getTextbooks(String term,
-                                       String department,
-                                       String course,
+                                       String subject,
+                                       String courseNumber,
                                        String section,
                                        Boolean isRequired) {
         String urlString = "http://osu.verbacompare.com/compare/books/?id="
-        String sectionId = "${term}__${department}__${course}__${section}"
+        String sectionId = "${term}__${subject}__${courseNumber}__${section}"
         urlString += sectionId
         List<Object> rawTextbooks = objectListCollector(urlString)
         List<Textbook> textbooks = rawTextbooks.collect { refineTextbook(it, sectionId) }
@@ -43,7 +43,7 @@ class TextbooksCollector {
                     term, department, course, section.name, isRequired
             )
             newBooks.each { newBook ->
-                if(!textbooks.find { newBook.isbn == it.isbn }) {
+                if(!textbooks.find { newBook.id == it.id }) {
                     textbooks.add(newBook)
                 }
             }
@@ -69,8 +69,7 @@ class TextbooksCollector {
         }
 
         new Textbook(
-                id: sectionId + "__${rawTextbook.isbn}",
-                isbn: rawTextbook.isbn,
+                id: rawTextbook.isbn,
                 isRequired: rawTextbook.required == "Required",
                 coverImageUrl: rawTextbook.cover_image_url,
                 title: rawTextbook.title,

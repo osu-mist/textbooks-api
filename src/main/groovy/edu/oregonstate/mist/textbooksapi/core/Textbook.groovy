@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 class Textbook {
     @JsonIgnore
     String id
-    String isbn
     Boolean isRequired
     String coverImageUrl
     String title

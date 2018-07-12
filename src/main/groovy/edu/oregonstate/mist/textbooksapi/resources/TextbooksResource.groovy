@@ -22,27 +22,21 @@ import javax.ws.rs.core.Response
 class TextbooksResource extends Resource {
 
     @GET
-    @Path("{id}")
-    Response getTextbooksById() {
-        Response.status(Response.Status.NOT_IMPLEMENTED).build()
-    }
-
-    @GET
     Response getTextbooks(@QueryParam("term") String term,
-                          @QueryParam("department") String department,
-                          @QueryParam("course") String course,
+                          @QueryParam("subject") String subject,
+                          @QueryParam("courseNumber") String courseNumber,
                           @QueryParam("section") Optional<String> section,
                           @QueryParam("isRequired") Optional<Boolean> isRequired) {
-        if(!(term && department && course)) {
-            return badRequest("Query must contain term, department, and course").build()
+        if(!(term && subject && courseNumber)) {
+            return badRequest("Query must contain term, subject, and courseNumber").build()
         }
         List<Textbook> textbooks
         if(section.isPresent()) {
             textbooks = TextbooksCollector.getTextbooks(
-                    term, department, course, section.get(), isRequired.orNull())
+                    term, subject, courseNumber, section.get(), isRequired.orNull())
         } else {
             textbooks = TextbooksCollector.getTextbooksNoSection(
-                    term, department, course, isRequired.orNull()
+                    term, subject, courseNumber, isRequired.orNull()
             )
         }
         ok(textbooksResult(textbooks)).build()
@@ -50,7 +44,7 @@ class TextbooksResource extends Resource {
 
     ResourceObject textbooksResource(Textbook textbook) {
         new ResourceObject(
-                id: textbook.isbn,
+                id: textbook.id,
                 type: "textbook",
                 attributes: textbook,
                 links: null
