@@ -1,14 +1,14 @@
 package edu.oregonstate.mist.textbooksapi
 
 import edu.oregonstate.mist.api.Application
-import edu.oregonstate.mist.textbooksapi.TextbooksConfiguration
+import edu.oregonstate.mist.api.Configuration
 import edu.oregonstate.mist.textbooksapi.resources.TextbooksResource
 import io.dropwizard.setup.Environment
 
 /**
  * Main application class.
  */
-class TextbooksApplication extends Application<TextbooksConfiguration> {
+class TextbooksApplication extends Application<Configuration> {
     /**
      * Parses command-line arguments and runs the application.
      *
@@ -16,9 +16,9 @@ class TextbooksApplication extends Application<TextbooksConfiguration> {
      * @param environment
      */
     @Override
-    void run(TextbooksConfiguration configuration, Environment environment) {
+    void run(Configuration configuration, Environment environment) {
         this.setup(configuration, environment)
-        environment.jersey().register(new TextbooksResource(configuration.api.endpointUri))
+        environment.jersey().register(new TextbooksResource())
     }
 
     /**

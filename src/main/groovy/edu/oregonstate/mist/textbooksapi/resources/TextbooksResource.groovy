@@ -1,15 +1,16 @@
 package edu.oregonstate.mist.textbooksapi.resources
 
+import com.google.common.base.Optional
+
 import edu.oregonstate.mist.api.Resource
 import edu.oregonstate.mist.api.jsonapi.ResourceObject
 import edu.oregonstate.mist.api.jsonapi.ResultObject
-import edu.oregonstate.mist.textbooksapi.TextbooksURIBuilder
+import edu.oregonstate.mist.textbooksapi.TextbooksCollector
 import edu.oregonstate.mist.textbooksapi.core.Textbook
 
 import javax.annotation.security.PermitAll
 import javax.ws.rs.GET
 import javax.ws.rs.Path
-import javax.ws.rs.PathParam
 import javax.ws.rs.Produces
 import javax.ws.rs.QueryParam
 import javax.ws.rs.core.MediaType
@@ -20,35 +21,39 @@ import javax.ws.rs.core.Response
 @Produces(MediaType.APPLICATION_JSON)
 class TextbooksResource extends Resource {
 
-    private URI baseURI
-    private TextbooksURIBuilder uriBuilder
-
-    TextbooksResource(URI baseURI) {
-        this.baseURI = baseURI
-        this.uriBuilder = new TextbooksURIBuilder(baseURI)
-    }
-
     @GET
     @Path("{id}")
-    Response getTextbooksById(@PathParam("id") String id) {
-        null
+    Response getTextbooksById() {
+        Response.status(Response.Status.NOT_IMPLEMENTED).build()
     }
 
     @GET
     Response getTextbooks(@QueryParam("term") String term,
                           @QueryParam("department") String department,
                           @QueryParam("course") String course,
-                          @QueryParam("section") String section,
-                          @QueryParam("isRequired") boolean isRequired) {
-        null
+                          @QueryParam("section") Optional<String> section,
+                          @QueryParam("isRequired") Optional<Boolean> isRequired) {
+        if(!(term && department && course)) {
+            return badRequest("Query must contain term, department, and course").build()
+        }
+        List<Textbook> textbooks
+        if(section.isPresent()) {
+            textbooks = TextbooksCollector.getTextbooks(
+                    term, department, course, section.get(), isRequired.orNull())
+        } else {
+            textbooks = TextbooksCollector.getTextbooksNoSection(
+                    term, department, course, isRequired.orNull()
+            )
+        }
+        ok(textbooksResult(textbooks)).build()
     }
 
     ResourceObject textbooksResource(Textbook textbook) {
         new ResourceObject(
-                id: textbook.id,
+                id: textbook.isbn,
                 type: "textbook",
                 attributes: textbook,
-                links: uriBuilder.textbooksURI(textbook.id)
+                links: null
         )
     }
 
