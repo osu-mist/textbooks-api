@@ -47,13 +47,6 @@ class TextbooksResource extends Resource {
         )
     }
 
-    ResultObject textbooksResult(Textbook textbook) {
-        new ResultObject(
-                links: null,
-                data: textbooksResource(textbook)
-        )
-    }
-
     ResultObject textbooksResult(List<Textbook> textbooks) {
         new ResultObject(
                 links: null,
