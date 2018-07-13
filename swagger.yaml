@@ -102,7 +102,7 @@ definitions:
         type: "integer"
         description: "Textbook edition"
         example: 9
-      copyright_year:
+      copyrightYear:
         type: "integer"
         description: "Textbook copyright year"
         example: 2016

@@ -16,31 +16,26 @@ class TextbooksCollector {
     static List<Textbook> getTextbooks(String term,
                                        String subject,
                                        String courseNumber,
-                                       String section,
-                                       Boolean isRequired) {
+                                       String section) {
         String urlString = "http://osu.verbacompare.com/compare/books/?id="
         String sectionId = "${term}__${subject}__${courseNumber}__${section}"
         urlString += sectionId
         List<Object> rawTextbooks = objectListCollector(urlString)
         List<Textbook> textbooks = rawTextbooks.collect { refineTextbook(it, sectionId) }
-        if(isRequired != null) {
-            textbooks.removeIf { it.isRequired != isRequired }
-        }
         textbooks
     }
 
     static List<Textbook> getTextbooksNoSection(String term,
                                                 String department,
-                                                String course,
-                                                Boolean isRequired) {
+                                                String course) {
         String urlString = "http://osu.verbacompare.com/compare/courses/?term_id="
         urlString += "${term}&id=${department}"
         List<Object> courses = objectListCollector(urlString)
         Object courseObject = courses.find { it.id == course }
         List<Textbook> textbooks = []
-        courseObject.sections.each { section ->
+        courseObject?.sections?.each { section ->
             List<Textbook> newBooks = getTextbooks(
-                    term, department, course, section.name, isRequired
+                    term, department, course, section.name
             )
             newBooks.each { newBook ->
                 if(!textbooks.find { newBook.id == it.id }) {
@@ -70,12 +65,11 @@ class TextbooksCollector {
 
         new Textbook(
                 id: rawTextbook.isbn,
-                isRequired: rawTextbook.required == "Required",
                 coverImageUrl: rawTextbook.cover_image_url,
                 title: rawTextbook.title,
                 author: rawTextbook.author,
                 edition: bookEdition,
-                copyright_year: copyrightYear,
+                copyrightYear: copyrightYear,
                 priceNewUSD: newPrice,
                 priceUsedUSD: usedPrice
         )

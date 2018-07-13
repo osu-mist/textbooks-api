@@ -25,19 +25,15 @@ class TextbooksResource extends Resource {
     Response getTextbooks(@QueryParam("term") String term,
                           @QueryParam("subject") String subject,
                           @QueryParam("courseNumber") String courseNumber,
-                          @QueryParam("section") Optional<String> section,
-                          @QueryParam("isRequired") Optional<Boolean> isRequired) {
+                          @QueryParam("section") Optional<String> section) {
         if(!(term && subject && courseNumber)) {
             return badRequest("Query must contain term, subject, and courseNumber").build()
         }
         List<Textbook> textbooks
         if(section.isPresent()) {
-            textbooks = TextbooksCollector.getTextbooks(
-                    term, subject, courseNumber, section.get(), isRequired.orNull())
+            textbooks = TextbooksCollector.getTextbooks(term, subject, courseNumber, section.get())
         } else {
-            textbooks = TextbooksCollector.getTextbooksNoSection(
-                    term, subject, courseNumber, isRequired.orNull()
-            )
+            textbooks = TextbooksCollector.getTextbooksNoSection(term, subject, courseNumber)
         }
         ok(textbooksResult(textbooks)).build()
     }
