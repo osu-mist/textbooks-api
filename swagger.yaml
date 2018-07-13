@@ -57,12 +57,6 @@ paths:
           type: "string"
           required: false
 
-        - name: "isRequired"
-          in: "query"
-          description: "If true, only retrieves required textbooks. If false, only retrieves non-required textbooks."
-          type: "boolean"
-          required: false
-
       responses:
         200:
           description: "Textbooks successfully retrieved"
@@ -82,10 +76,6 @@ definitions:
   Textbook:
     type: "object"
     properties:
-      isRequired:
-        type: "boolean"
-        description: "Indicates whether textbook is required or not"
-        example: true
       coverImageUrl:
         type: "string"
         description: "URL of cover image"

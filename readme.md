@@ -18,7 +18,6 @@ Example response:
             "id": "9780393265392",
             "type": "textbook",
             "attributes": {
-                "isRequired": true,
                 "coverImageUrl": "//coverimages.verbacompete.com/425589bb-0f05-52c4-b6e9-964d849b9998.jpg",
                 "title": "Perspectives From The Past Vol 1",
                 "author": "Brophy",
@@ -33,7 +32,6 @@ Example response:
             "id": "9780393650402",
             "type": "textbook",
             "attributes": {
-                "isRequired": true,
                 "coverImageUrl": "//coverimages.verbacompete.com/no_image.jpg",
                 "title": "Western Civilization 19th Ed Vol 1 W/Perspectives From The Past 6th Ed Pkg",
                 "author": "Cole (2)",
