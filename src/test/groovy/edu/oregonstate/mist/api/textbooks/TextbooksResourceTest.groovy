@@ -66,6 +66,14 @@ class TextbooksResourceTest {
         }
     }
 
+    /**
+     * Validates a response given certain requirements
+     *
+     * @param res Response object
+     * @param code HTTP status code
+     * @param message If not null, will validate message is found in developerMessage field
+     * @param validBooks If true, will validate that response correlates to textbooksList
+     */
     void validateResponse(def res, int code, String message, boolean validBooks) {
         assert res.status == code
         if(message) {
@@ -78,6 +86,12 @@ class TextbooksResourceTest {
         }
     }
 
+    /**
+     * Creates a closure for mocking the TextbooksCollector.getTextbooks method
+     *
+     * @param nonEmpty
+     * @return
+     */
     Closure getMockCollectorClosure(boolean nonEmpty) {
         if(nonEmpty) {
             { String term, String subject, String courseNumber, String section -> textbookList }

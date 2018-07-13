@@ -21,6 +21,15 @@ import javax.ws.rs.core.Response
 @Produces(MediaType.APPLICATION_JSON)
 class TextbooksResource extends Resource {
 
+    /**
+     * GET textbooks by parameters
+     *
+     * @param term Term of course. Example: 2018-Fall
+     * @param subject Subject of course. Example: HST
+     * @param courseNumber Course number. Example: 101
+     * @param section Section number. Example: 001
+     * @return Response
+     */
     @GET
     Response getTextbooks(@QueryParam("term") String term,
                           @QueryParam("subject") String subject,
@@ -38,6 +47,12 @@ class TextbooksResource extends Resource {
         ok(textbooksResult(textbooks)).build()
     }
 
+    /**
+     * Builds a jsonapi ResourceObject from a Textbook object
+     *
+     * @param textbook
+     * @return ResourceObject
+     */
     ResourceObject textbooksResource(Textbook textbook) {
         new ResourceObject(
                 id: textbook.id,
@@ -47,6 +62,12 @@ class TextbooksResource extends Resource {
         )
     }
 
+    /**
+     * Builds a jsonapi ResultObject from a list of Textbook objects
+     *
+     * @param textbooks
+     * @return ResultObject
+     */
     ResultObject textbooksResult(List<Textbook> textbooks) {
         new ResultObject(
                 links: null,

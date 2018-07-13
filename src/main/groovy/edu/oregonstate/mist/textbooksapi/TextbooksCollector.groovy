@@ -13,6 +13,15 @@ import org.apache.http.util.EntityUtils
 
 class TextbooksCollector {
 
+    /**
+     * Queries Verba compare and builds a list of textbooks
+     *
+     * @param term
+     * @param subject
+     * @param courseNumber
+     * @param section
+     * @return
+     */
     static List<Textbook> getTextbooks(String term, String subject,
                                        String courseNumber, String section) {
         String urlString = "http://osu.verbacompare.com/compare/books/?id="
@@ -22,6 +31,14 @@ class TextbooksCollector {
         textbooks
     }
 
+    /**
+     * Queries Verba compare and builds a list of textbooks for all sections of a course
+     *
+     * @param term
+     * @param department
+     * @param course
+     * @return
+     */
     static List<Textbook> getTextbooksNoSection(String term, String department, String course) {
         String urlString = "http://osu.verbacompare.com/compare/courses/?term_id="
         urlString += "${term}&id=${department}"
@@ -41,6 +58,12 @@ class TextbooksCollector {
         textbooks
     }
 
+    /**
+     * Converts verba compare JSON response to Textbook object
+     *
+     * @param rawTextbook
+     * @return
+     */
     static Textbook refineTextbook(Object rawTextbook) {
         Float usedPrice = null
         Float newPrice = null
@@ -70,6 +93,12 @@ class TextbooksCollector {
         )
     }
 
+    /**
+     * Queries Verba compare and returns the JSON list response
+     *
+     * @param urlString
+     * @return
+     */
     static List<Object> objectListCollector(String urlString) {
         HttpClient client = HttpClients.createDefault()
         HttpGet req = new HttpGet(urlString)
