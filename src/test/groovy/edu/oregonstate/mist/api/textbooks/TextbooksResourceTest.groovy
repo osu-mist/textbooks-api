@@ -57,10 +57,11 @@ class TextbooksResourceTest {
     @Test
     void testBadRequest() {
         TextbooksCollector.metaClass.static.getTextbooks = getMockCollectorClosure(true)
-        def badRequests = []
-        badRequests.add(resource.getTextbooks(null, "AAA", "111", Optional.of("111")))
-        badRequests.add(resource.getTextbooks("Term", null, "111", Optional.of("111")))
-        badRequests.add(resource.getTextbooks("Term", "AAA", null, Optional.of("111")))
+        def badRequests = [
+                resource.getTextbooks(null, "AAA", "111", Optional.of("111")),
+                resource.getTextbooks("Term", null, "111", Optional.of("111")),
+                resource.getTextbooks("Term", "AAA", null, Optional.of("111"))
+        ]
         badRequests.each {
             validateResponse(it, 400, "Query must contain term, subject, and courseNumber", false)
         }
