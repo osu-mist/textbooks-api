@@ -16,10 +16,9 @@ class TextbooksCollector {
     static List<Textbook> getTextbooks(String term, String subject,
                                        String courseNumber, String section) {
         String urlString = "http://osu.verbacompare.com/compare/books/?id="
-        String sectionId = "${term}__${subject}__${courseNumber}__${section}"
-        urlString += sectionId
+        urlString += "${term}__${subject}__${courseNumber}__${section}"
         List<Object> rawTextbooks = objectListCollector(urlString)
-        List<Textbook> textbooks = rawTextbooks.collect { refineTextbook(it, sectionId) }
+        List<Textbook> textbooks = rawTextbooks.collect { refineTextbook(it) }
         textbooks
     }
 
@@ -42,7 +41,7 @@ class TextbooksCollector {
         textbooks
     }
 
-    static Textbook refineTextbook(Object rawTextbook, String sectionId) {
+    static Textbook refineTextbook(Object rawTextbook) {
         Float usedPrice = null
         Float newPrice = null
         rawTextbook.offers.each {
