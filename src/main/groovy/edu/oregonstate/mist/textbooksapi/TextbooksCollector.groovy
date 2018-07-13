@@ -13,10 +13,8 @@ import org.apache.http.util.EntityUtils
 
 class TextbooksCollector {
 
-    static List<Textbook> getTextbooks(String term,
-                                       String subject,
-                                       String courseNumber,
-                                       String section) {
+    static List<Textbook> getTextbooks(String term, String subject,
+                                       String courseNumber, String section) {
         String urlString = "http://osu.verbacompare.com/compare/books/?id="
         String sectionId = "${term}__${subject}__${courseNumber}__${section}"
         urlString += sectionId
@@ -25,9 +23,7 @@ class TextbooksCollector {
         textbooks
     }
 
-    static List<Textbook> getTextbooksNoSection(String term,
-                                                String department,
-                                                String course) {
+    static List<Textbook> getTextbooksNoSection(String term, String department, String course) {
         String urlString = "http://osu.verbacompare.com/compare/courses/?term_id="
         urlString += "${term}&id=${department}"
         List<Object> courses = objectListCollector(urlString)
