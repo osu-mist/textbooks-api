@@ -46,6 +46,13 @@ authentication:
 api:
   endpointUri: https://api.oregonstate.edu/v1/web-api-skeleton/
 
+textbooksApi:
+  verbaCompareUri: http://osu.verbacompare.com/
+
+httpClient:
+  timeout: 15000ms
+  retries: 2
+
 #
 ## Example Oracle configuration
 #
