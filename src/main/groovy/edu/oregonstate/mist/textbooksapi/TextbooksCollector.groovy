@@ -116,9 +116,9 @@ class TextbooksCollector {
         Float usedPrice = null
         Float newPrice = null
         rawTextbook.offers.each {
-            if (it.condition == "new" && it.rental_days == null) {
+            if(it.condition == "new" && it.rental_days == null) {
                 newPrice = Float.parseFloat(it.price)
-            } else if (it.condition == "used" && it.rental_days == null) {
+            } else if(it.condition == "used" && it.rental_days == null) {
                 usedPrice = Float.parseFloat(it.price)
             }
         }

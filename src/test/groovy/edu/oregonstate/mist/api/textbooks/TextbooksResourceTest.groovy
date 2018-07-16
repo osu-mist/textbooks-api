@@ -55,11 +55,13 @@ class TextbooksResourceTest {
         validateResponse(res, 200, null, true)
     }
 
-    // Test not using required fields
+    // Test invalid requests
     @Test
     void testBadRequest() {
         TextbooksCollector.metaClass.getTextbooks = getMockCollectorClosure(true)
         TextbooksResource resource = getTextbooksResource()
+
+        // Test not using required fields
         def badRequests = [
                 resource.getTextbooks(null, "AAA", "111", Optional.of("111")),
                 resource.getTextbooks("Term", null, "111", Optional.of("111")),
@@ -67,6 +69,17 @@ class TextbooksResourceTest {
         ]
         badRequests.each {
             validateResponse(it, 400, "Query must contain", false)
+        }
+
+        // Test using invalid patterns in fields
+        def badPatterns = [
+                resource.getTextbooks("(", "AAA", "111", Optional.of("111")),
+                resource.getTextbooks("Term", "(", "111", Optional.of("111")),
+                resource.getTextbooks("Term", "AAA", "(", Optional.of("111")),
+                resource.getTextbooks("Term", "AAA", "111", Optional.of("("))
+        ]
+        badPatterns.each {
+            validateResponse(it, 400, "must match pattern", false)
         }
     }
 
