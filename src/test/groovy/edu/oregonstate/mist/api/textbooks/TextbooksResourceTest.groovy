@@ -21,14 +21,14 @@ class TextbooksResourceTest {
             priceUsedUSD: 1.00
     )
     List<Textbook> textbookList = [textbook, textbook, textbook]
-    TextbooksResource resource = new TextbooksResource()
 
     // Test getTextbooks
 
     // Test using all arguments
     @Test
     void testAllArgs() {
-        TextbooksCollector.metaClass.static.getTextbooks = getMockCollectorClosure(true)
+        TextbooksCollector.metaClass.getTextbooks = getMockCollectorClosure(true)
+        TextbooksResource resource = getTextbooksResource()
         def res = resource.getTextbooks("Term", "AAA", "111", Optional.of("111"))
         validateResponse(res, 200, null, true)
     }
@@ -36,7 +36,8 @@ class TextbooksResourceTest {
     // Test no textbooks found
     @Test
     void testNoBooksFound() {
-        TextbooksCollector.metaClass.static.getTextbooks = getMockCollectorClosure(false)
+        TextbooksCollector.metaClass.getTextbooks = getMockCollectorClosure(false)
+        TextbooksResource resource = getTextbooksResource()
         def res = resource.getTextbooks("Term", "AAA", "111", Optional.of("111"))
         validateResponse(res, 200,  null, false)
         assert res.entity.data == []
@@ -45,10 +46,11 @@ class TextbooksResourceTest {
     // Test not using section
     @Test
     void testNoSection() {
-        TextbooksCollector.metaClass.static.getTextbooksNoSection = {
+        TextbooksCollector.metaClass.getTextbooksNoSection = {
             String term, String subject, String courseNumber -> textbookList
         }
-        TextbooksCollector.metaClass.static.getTextbooks = getMockCollectorClosure(true)
+        TextbooksCollector.metaClass.getTextbooks = getMockCollectorClosure(true)
+        TextbooksResource resource = getTextbooksResource()
         def res = resource.getTextbooks("Term", "AAA", "111", Optional.absent())
         validateResponse(res, 200, null, true)
     }
@@ -56,7 +58,8 @@ class TextbooksResourceTest {
     // Test not using required fields
     @Test
     void testBadRequest() {
-        TextbooksCollector.metaClass.static.getTextbooks = getMockCollectorClosure(true)
+        TextbooksCollector.metaClass.getTextbooks = getMockCollectorClosure(true)
+        TextbooksResource resource = getTextbooksResource()
         def badRequests = [
                 resource.getTextbooks(null, "AAA", "111", Optional.of("111")),
                 resource.getTextbooks("Term", null, "111", Optional.of("111")),
@@ -99,5 +102,10 @@ class TextbooksResourceTest {
         } else {
             { String term, String subject, String courseNumber, String section -> [] }
         }
+    }
+
+    TextbooksResource getTextbooksResource() {
+        TextbooksCollector textbooksCollector = new TextbooksCollector(null, "")
+        new TextbooksResource(textbooksCollector)
     }
 }

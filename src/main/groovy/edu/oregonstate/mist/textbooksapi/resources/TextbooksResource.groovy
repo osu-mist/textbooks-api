@@ -21,6 +21,12 @@ import javax.ws.rs.core.Response
 @Produces(MediaType.APPLICATION_JSON)
 class TextbooksResource extends Resource {
 
+    private TextbooksCollector textbooksCollector
+
+    TextbooksResource(TextbooksCollector textbooksCollector) {
+        this.textbooksCollector = textbooksCollector
+    }
+
     /**
      * GET textbooks by parameters
      *
@@ -40,9 +46,9 @@ class TextbooksResource extends Resource {
         }
         List<Textbook> textbooks
         if(section.isPresent()) {
-            textbooks = TextbooksCollector.getTextbooks(term, subject, courseNumber, section.get())
+            textbooks = textbooksCollector.getTextbooks(term, subject, courseNumber, section.get())
         } else {
-            textbooks = TextbooksCollector.getTextbooksNoSection(term, subject, courseNumber)
+            textbooks = textbooksCollector.getTextbooksNoSection(term, subject, courseNumber)
         }
         ok(textbooksResult(textbooks)).build()
     }

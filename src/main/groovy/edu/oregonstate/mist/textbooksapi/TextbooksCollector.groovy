@@ -4,14 +4,25 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.type.TypeFactory
 
 import edu.oregonstate.mist.textbooksapi.core.Textbook
-
 import org.apache.http.HttpResponse
 import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.HttpGet
-import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
 
+import javax.ws.rs.core.UriBuilder
+
 class TextbooksCollector {
+
+    private HttpClient httpClient
+    private URI booksUri
+    private URI coursesUri
+
+    TextbooksCollector(HttpClient httpClient, String verbaCompareUri) {
+        this.httpClient = httpClient
+        UriBuilder builder = UriBuilder.fromPath(verbaCompareUri)
+        this.booksUri = builder.path("compare/books").build()
+        this.coursesUri = builder.path("compare/courses").build()
+    }
 
     /**
      * Queries Verba compare and builds a list of textbooks
@@ -22,7 +33,7 @@ class TextbooksCollector {
      * @param section
      * @return
      */
-    static List<Textbook> getTextbooks(String term, String subject,
+    List<Textbook> getTextbooks(String term, String subject,
                                        String courseNumber, String section) {
         String urlString = "http://osu.verbacompare.com/compare/books/?id="
         urlString += "${term}__${subject}__${courseNumber}__${section}"
@@ -39,7 +50,7 @@ class TextbooksCollector {
      * @param course
      * @return
      */
-    static List<Textbook> getTextbooksNoSection(String term, String department, String course) {
+    List<Textbook> getTextbooksNoSection(String term, String department, String course) {
         String urlString = "http://osu.verbacompare.com/compare/courses/?term_id="
         urlString += "${term}&id=${department}"
         List<Object> courses = objectListCollector(urlString)
@@ -64,7 +75,7 @@ class TextbooksCollector {
      * @param rawTextbook
      * @return
      */
-    static Textbook refineTextbook(Object rawTextbook) {
+    Textbook refineTextbook(Object rawTextbook) {
         Float usedPrice = null
         Float newPrice = null
         rawTextbook.offers.each {
@@ -99,10 +110,9 @@ class TextbooksCollector {
      * @param urlString
      * @return
      */
-    static List<Object> objectListCollector(String urlString) {
-        HttpClient client = HttpClients.createDefault()
+    List<Object> objectListCollector(String urlString) {
         HttpGet req = new HttpGet(urlString)
-        HttpResponse res = client.execute(req)
+        HttpResponse res = httpClient.execute(req)
         int status = res.getStatusLine().getStatusCode()
 
         // Verba compare request should return a 200, regardless of parameters

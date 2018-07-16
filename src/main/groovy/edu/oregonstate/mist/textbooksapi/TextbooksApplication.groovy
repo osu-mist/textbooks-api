@@ -1,14 +1,15 @@
 package edu.oregonstate.mist.textbooksapi
 
 import edu.oregonstate.mist.api.Application
-import edu.oregonstate.mist.api.Configuration
 import edu.oregonstate.mist.textbooksapi.resources.TextbooksResource
+
+import io.dropwizard.client.HttpClientBuilder
 import io.dropwizard.setup.Environment
 
 /**
  * Main application class.
  */
-class TextbooksApplication extends Application<Configuration> {
+class TextbooksApplication extends Application<TextbooksConfiguration> {
     /**
      * Parses command-line arguments and runs the application.
      *
@@ -16,9 +17,15 @@ class TextbooksApplication extends Application<Configuration> {
      * @param environment
      */
     @Override
-    void run(Configuration configuration, Environment environment) {
+    void run(TextbooksConfiguration configuration, Environment environment) {
         this.setup(configuration, environment)
-        environment.jersey().register(new TextbooksResource())
+
+        HttpClientBuilder httpClientBuilder = new HttpClientBuilder(environment)
+        TextbooksCollector textbooksCollector = new TextbooksCollector(
+                httpClientBuilder.build(), configuration.textbooksApi.verbaCompareUri
+        )
+
+        environment.jersey().register(new TextbooksResource(textbooksCollector))
     }
 
     /**
