@@ -66,7 +66,7 @@ class TextbooksResourceTest {
                 resource.getTextbooks("Term", "AAA", null, Optional.of("111"))
         ]
         badRequests.each {
-            validateResponse(it, 400, "Query must contain term, subject, and courseNumber", false)
+            validateResponse(it, 400, "Query must contain", false)
         }
     }
 

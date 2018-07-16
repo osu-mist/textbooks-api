@@ -8,6 +8,8 @@ import edu.oregonstate.mist.api.jsonapi.ResultObject
 import edu.oregonstate.mist.textbooksapi.TextbooksCollector
 import edu.oregonstate.mist.textbooksapi.core.Textbook
 
+import java.util.regex.Pattern
+
 import javax.annotation.security.PermitAll
 import javax.ws.rs.GET
 import javax.ws.rs.Path
@@ -22,6 +24,7 @@ import javax.ws.rs.core.Response
 class TextbooksResource extends Resource {
 
     private TextbooksCollector textbooksCollector
+    private Pattern validPattern = ~"[A-Za-z0-9-]+"
 
     TextbooksResource(TextbooksCollector textbooksCollector) {
         this.textbooksCollector = textbooksCollector
@@ -41,8 +44,20 @@ class TextbooksResource extends Resource {
                           @QueryParam("subject") String subject,
                           @QueryParam("courseNumber") String courseNumber,
                           @QueryParam("section") Optional<String> section) {
-        if(!(term && subject && courseNumber)) {
-            return badRequest("Query must contain term, subject, and courseNumber").build()
+        def params = [term: term, subject: subject, courseNumber: courseNumber]
+        def badResponse = null
+        params.findAll() { key, value ->
+            if(!value) {
+                badResponse = badRequest("Query must contain ${key}").build()
+            } else if(!(value ==~ validPattern)) {
+                badResponse = badRequest("${key} must match pattern ${validPattern}").build()
+            }
+        }
+        if(badResponse) {
+            return badResponse
+        }
+        if(section.isPresent() && !(section.get() ==~ validPattern)) {
+            return badRequest("section must match pattern ${validPattern}").build()
         }
         List<Textbook> textbooks = textbooksCollector.getTextbooks(
                 term, subject, courseNumber, section
