@@ -21,6 +21,11 @@ class TextbooksApplication extends Application<TextbooksConfiguration> {
         this.setup(configuration, environment)
 
         HttpClientBuilder httpClientBuilder = new HttpClientBuilder(environment)
+
+        if(configuration.httpClient != null) {
+            httpClientBuilder.using(configuration.httpClient)
+        }
+
         TextbooksCollector textbooksCollector = new TextbooksCollector(
                 httpClientBuilder.build(), configuration.textbooksApi.verbaCompareUri
         )

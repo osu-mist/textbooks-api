@@ -1,31 +1,42 @@
 package edu.oregonstate.mist.textbooksapi
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.type.TypeFactory
+
+import com.google.common.base.Optional
 
 import edu.oregonstate.mist.textbooksapi.core.Textbook
+
+import javax.ws.rs.core.UriBuilder
+
 import org.apache.http.HttpResponse
+import org.apache.http.HttpStatus
 import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.util.EntityUtils
-
-import javax.ws.rs.core.UriBuilder
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class TextbooksCollector {
 
     private HttpClient httpClient
     private URI booksUri
     private URI coursesUri
+    private static Logger logger = LoggerFactory.getLogger(this)
+    ObjectMapper objectMapper = new ObjectMapper()
 
     TextbooksCollector(HttpClient httpClient, String verbaCompareUri) {
         this.httpClient = httpClient
         UriBuilder builder = UriBuilder.fromPath(verbaCompareUri)
         this.booksUri = builder.path("compare/books").build()
+        builder.replacePath(verbaCompareUri)
         this.coursesUri = builder.path("compare/courses").build()
     }
 
     /**
-     * Queries Verba compare and builds a list of textbooks
+     * Builds a list of textbooks in a single section of a course
      *
      * @param term
      * @param subject
@@ -34,16 +45,31 @@ class TextbooksCollector {
      * @return
      */
     List<Textbook> getTextbooks(String term, String subject,
-                                       String courseNumber, String section) {
-        String urlString = "http://osu.verbacompare.com/compare/books/?id="
-        urlString += "${term}__${subject}__${courseNumber}__${section}"
-        List<Object> rawTextbooks = objectListCollector(urlString)
+                                String courseNumber, Optional<String> section) {
+        if(!section.isPresent()) {
+            return getTextbooksNoSection(term, subject, courseNumber)
+        }
+
+        UriBuilder uriBuilder = UriBuilder.fromUri(booksUri)
+        uriBuilder.queryParam("id", "${term}__${subject}__${courseNumber}__${section.get()}")
+
+        def res = getResponse(uriBuilder.build())
+        String rawTextbooksString = EntityUtils.toString(res.getEntity())
+        List<RawTextbook> rawTextbooks
+        try {
+            rawTextbooks = objectMapper.readValue(
+                    rawTextbooksString,
+                    new TypeReference<List<RawTextbook>>() {}
+            )
+        } catch (JsonMappingException exception) {
+            throw new Exception(exception)
+        }
         List<Textbook> textbooks = rawTextbooks.collect { refineTextbook(it) }
         textbooks
     }
 
     /**
-     * Queries Verba compare and builds a list of textbooks for all sections of a course
+     * Builds a list of textbooks for all sections of a course
      *
      * @param term
      * @param department
@@ -51,17 +77,29 @@ class TextbooksCollector {
      * @return
      */
     List<Textbook> getTextbooksNoSection(String term, String department, String course) {
-        String urlString = "http://osu.verbacompare.com/compare/courses/?term_id="
-        urlString += "${term}&id=${department}"
-        List<Object> courses = objectListCollector(urlString)
-        Object courseObject = courses.find { it.id == course }
+        UriBuilder uriBuilder = UriBuilder.fromUri(coursesUri)
+        uriBuilder.queryParam("term_id", "${term}")
+        uriBuilder.queryParam("id", "${department}")
+
+        def res = getResponse(uriBuilder.build())
+        String coursesString = EntityUtils.toString(res.getEntity())
+        List<Course> courses
+        try {
+            courses = objectMapper.readValue(
+                    coursesString,
+                    new TypeReference<List<Course>>(){}
+            )
+        } catch (JsonMappingException exception) {
+            throw new Exception(exception)
+        }
+        Course courseObject = courses.find { it.id == course }
         List<Textbook> textbooks = []
         courseObject?.sections?.each { section ->
             List<Textbook> newBooks = getTextbooks(
-                    term, department, course, section.name
+                    term, department, course, Optional.of(section.name)
             )
             newBooks.each { newBook ->
-                if(!textbooks.find { newBook.id == it.id }) {
+                if (!textbooks.find { newBook.id == it.id }) {
                     textbooks.add(newBook)
                 }
             }
@@ -70,18 +108,18 @@ class TextbooksCollector {
     }
 
     /**
-     * Converts verba compare JSON response to Textbook object
+     * Converts RawTextbook object to Textbook object
      *
      * @param rawTextbook
      * @return
      */
-    Textbook refineTextbook(Object rawTextbook) {
+    Textbook refineTextbook(RawTextbook rawTextbook) {
         Float usedPrice = null
         Float newPrice = null
         rawTextbook.offers.each {
-            if(it.condition == "new" && it.rental_days == null) {
+            if (it.condition == "new" && it.rental_days == null) {
                 newPrice = Float.parseFloat(it.price)
-            } else if(it.condition == "used" && it.rental_days == null) {
+            } else if (it.condition == "used" && it.rental_days == null) {
                 usedPrice = Float.parseFloat(it.price)
             }
         }
@@ -105,27 +143,54 @@ class TextbooksCollector {
     }
 
     /**
-     * Queries Verba compare and returns the JSON list response
+     * Queries Verba compare and returns the HTTP response
      *
-     * @param urlString
+     * @param uri
      * @return
      */
-    List<Object> objectListCollector(String urlString) {
-        HttpGet req = new HttpGet(urlString)
+    HttpResponse getResponse(URI uri) {
+        HttpGet req = new HttpGet(uri)
         HttpResponse res = httpClient.execute(req)
         int status = res.getStatusLine().getStatusCode()
 
         // Verba compare request should return a 200, regardless of parameters
-        if(status != 200) {
+        if (status != HttpStatus.SC_OK) {
+            logger.error("""\
+            Something went wrong with Verba compare request.
+            Requested URI: ${uri}.
+            HTTP response code: ${status}\
+            """.stripIndent())
             throw new Exception("Something went wrong with Verba compare request")
         }
-        ObjectMapper objectMapper = new ObjectMapper()
-        TypeFactory typeFactory = objectMapper.getTypeFactory()
-        String rawTextbooksString = EntityUtils.toString(res.getEntity())
-        List<Object> objectList = objectMapper.readValue(
-                rawTextbooksString,
-                typeFactory.constructCollectionType(List.class, Object.class)
-        )
-        objectList
+        res
     }
+}
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+class RawTextbook {
+    String isbn
+    String cover_image_url
+    String title
+    String author
+    String edition
+    String copyright_year
+    List<Offer> offers
+}
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+class Offer {
+    String price
+    String condition
+    String rental_days
+}
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+class Course {
+    String id
+    List<Section> sections
+}
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+class Section {
+    String name
 }

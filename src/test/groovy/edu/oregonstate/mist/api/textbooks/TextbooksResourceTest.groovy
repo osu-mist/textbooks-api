@@ -98,9 +98,11 @@ class TextbooksResourceTest {
      */
     Closure getMockCollectorClosure(boolean nonEmpty) {
         if(nonEmpty) {
-            { String term, String subject, String courseNumber, String section -> textbookList }
+            { String term, String subject, String courseNumber,
+              Optional<String> section -> textbookList }
         } else {
-            { String term, String subject, String courseNumber, String section -> [] }
+            { String term, String subject, String courseNumber,
+              Optional<String> section -> [] }
         }
     }
 

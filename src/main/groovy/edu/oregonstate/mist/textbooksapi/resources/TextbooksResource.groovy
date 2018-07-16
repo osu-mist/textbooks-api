@@ -44,12 +44,9 @@ class TextbooksResource extends Resource {
         if(!(term && subject && courseNumber)) {
             return badRequest("Query must contain term, subject, and courseNumber").build()
         }
-        List<Textbook> textbooks
-        if(section.isPresent()) {
-            textbooks = textbooksCollector.getTextbooks(term, subject, courseNumber, section.get())
-        } else {
-            textbooks = textbooksCollector.getTextbooksNoSection(term, subject, courseNumber)
-        }
+        List<Textbook> textbooks = textbooksCollector.getTextbooks(
+                term, subject, courseNumber, section
+        )
         ok(textbooksResult(textbooks)).build()
     }
 
