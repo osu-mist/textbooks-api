@@ -61,12 +61,17 @@ class TextbooksResource extends Resource {
         if(section.isPresent() && !(section.get() ==~ validPattern)) {
             return badRequest("section must match pattern ${validPattern}").build()
         }
-        String termString
-        badResponse = textbooksCollector.validateTerm(academicYear, term)
-        if(badResponse) {
-            return badResponse
-        } else {
-            termString = "${academicYear}-${term}"
+        String termString = "${academicYear}-${term}"
+        def validTerms = textbooksCollector.getValidTerms()
+        if(!validTerms.find { year, terms -> year == academicYear && terms.contains(term) }) {
+            def validCombinations = []
+            validTerms.each { year, singleTerm ->
+                singleTerm.each {
+                    validCombinations.add("${year}, ${it}")
+                }
+            }
+            return badRequest("Invalid academicYear/term combination. " +
+                    "Valid combinations are [${validCombinations.join("], [")}]").build()
         }
         List<Textbook> textbooks = textbooksCollector.getTextbooks(
                 termString, subject, courseNumber, section

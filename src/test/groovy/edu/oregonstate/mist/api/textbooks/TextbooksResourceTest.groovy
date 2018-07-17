@@ -20,8 +20,10 @@ class TextbooksResourceTest {
             priceNewUSD: 9999.99,
             priceUsedUSD: 1.00
     )
+    def defaultParams = ["2018", "Term", "AAA", "111", Optional.of("111")]
     List<Textbook> textbookList = [textbook, textbook, textbook]
-    Closure validTermClosure = {String academicYear, String term -> null}
+    Map<String, List<String>> validTerms = ["2018": ["Term"]]
+    Closure validTermClosure = { validTerms }
 
     // Test getTextbooks
 
@@ -30,7 +32,7 @@ class TextbooksResourceTest {
     void testAllArgs() {
         TextbooksCollector.metaClass.getTextbooks = getMockCollectorClosure(true)
         TextbooksResource resource = getTextbooksResource()
-        def res = resource.getTextbooks("2018", "Term", "AAA", "111", Optional.of("111"))
+        def res = resource.getTextbooks(*defaultParams)
         validateResponse(res, 200, null, true)
     }
 
@@ -39,7 +41,7 @@ class TextbooksResourceTest {
     void testNoBooksFound() {
         TextbooksCollector.metaClass.getTextbooks = getMockCollectorClosure(false)
         TextbooksResource resource = getTextbooksResource()
-        def res = resource.getTextbooks("2018", "Term", "AAA", "111", Optional.of("111"))
+        def res = resource.getTextbooks(*defaultParams)
         validateResponse(res, 200,  null, false)
         assert res.entity.data == []
     }
@@ -52,7 +54,7 @@ class TextbooksResourceTest {
         }
         TextbooksCollector.metaClass.getTextbooks = getMockCollectorClosure(true)
         TextbooksResource resource = getTextbooksResource()
-        def res = resource.getTextbooks("2018", "Term", "AAA", "111", Optional.absent())
+        def res = resource.getTextbooks(*defaultParams[0..3], Optional.absent())
         validateResponse(res, 200, null, true)
     }
 
@@ -64,10 +66,10 @@ class TextbooksResourceTest {
 
         // Test not using required fields
         def badRequests = [
-                resource.getTextbooks(null, "Term", "AAA", "111", Optional.of("111")),
-                resource.getTextbooks("2018", null, "AAA", "111", Optional.of("111")),
-                resource.getTextbooks("2018", "Term", null, "111", Optional.of("111")),
-                resource.getTextbooks("2018", "Term", "AAA", null, Optional.of("111"))
+                resource.getTextbooks(null, *defaultParams[1..4]),
+                resource.getTextbooks(defaultParams[0], null, *defaultParams[2..4]),
+                resource.getTextbooks(*defaultParams[0..1], null, *defaultParams[3..4]),
+                resource.getTextbooks(*defaultParams[0..2], null, defaultParams[4])
         ]
         badRequests.each {
             validateResponse(it, 400, "Query must contain", false)
@@ -75,11 +77,11 @@ class TextbooksResourceTest {
 
         // Test using invalid patterns in fields
         def badPatterns = [
-                resource.getTextbooks("(", "Term", "AAA", "111", Optional.of("111")),
-                resource.getTextbooks("2018", "(", "AAA", "111", Optional.of("111")),
-                resource.getTextbooks("2018", "Term", "(", "111", Optional.of("111")),
-                resource.getTextbooks("2018", "Term", "AAA", "(", Optional.of("111")),
-                resource.getTextbooks("2018", "Term", "AAA", "111", Optional.of("("))
+                resource.getTextbooks("(", *defaultParams[1..4]),
+                resource.getTextbooks(defaultParams[0], "(", *defaultParams[2..4]),
+                resource.getTextbooks(*defaultParams[0..1], "(", *defaultParams[3..4]),
+                resource.getTextbooks(*defaultParams[0..2], "(", defaultParams[4]),
+                resource.getTextbooks(*defaultParams[0..3], Optional.of("("))
         ]
         badPatterns.each {
             validateResponse(it, 400, "must match pattern", false)
@@ -123,7 +125,7 @@ class TextbooksResourceTest {
     }
 
     TextbooksResource getTextbooksResource() {
-        TextbooksCollector.metaClass.validateTerm = validTermClosure
+        TextbooksCollector.metaClass.getValidTerms = validTermClosure
         TextbooksCollector textbooksCollector = new TextbooksCollector(null, "")
         new TextbooksResource(textbooksCollector)
     }

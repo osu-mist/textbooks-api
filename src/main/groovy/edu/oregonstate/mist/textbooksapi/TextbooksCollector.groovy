@@ -6,10 +6,8 @@ import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Optional
 
-import edu.oregonstate.mist.api.Resource
 import edu.oregonstate.mist.textbooksapi.core.Textbook
 
-import javax.ws.rs.core.Response
 import javax.ws.rs.core.UriBuilder
 
 import org.apache.http.HttpResponse
@@ -148,16 +146,19 @@ class TextbooksCollector {
         res
     }
 
-    Response validateTerm(String academicYear, String term) {
-        String termString = "${academicYear}-${term}"
+    Map<String, List<String>> getValidTerms() {
         def res = getResponse(coursesUri)
         List<Term> termList = getListFromResponse(res, Term.class)
-        if(termList.find { it.id == termString }) {
-            null
-        } else {
-            Resource.badRequest("Invalid term: '${termString}'. Valid terms are [" +
-                    "${termList.id.join(", ")}]").build()
+        Map<String, List<String>> mappedTerms = [:]
+        termList.each {
+            def (String year, String term) = it.id.split("-")
+            if(mappedTerms.containsKey(year)) {
+                mappedTerms[year].add(term)
+            } else {
+                mappedTerms.put(year, [term])
+            }
         }
+        mappedTerms
     }
 
     def getListFromResponse(HttpResponse res, Class objectType) {
