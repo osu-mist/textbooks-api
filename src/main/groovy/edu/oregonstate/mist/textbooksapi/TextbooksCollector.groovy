@@ -2,16 +2,15 @@ package edu.oregonstate.mist.textbooksapi
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Optional
 
-import edu.oregonstate.mist.textbooksapi.core.Textbook
 import edu.oregonstate.mist.api.Resource
+import edu.oregonstate.mist.textbooksapi.core.Textbook
 
-import javax.ws.rs.core.UriBuilder
 import javax.ws.rs.core.Response
+import javax.ws.rs.core.UriBuilder
 
 import org.apache.http.HttpResponse
 import org.apache.http.HttpStatus
