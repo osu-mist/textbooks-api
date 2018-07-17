@@ -3,7 +3,7 @@
 ## Do not commit changes that contain credentials or sensitive data!
 
 server:
-  rootPath: /api/v0/*
+  rootPath: /api/v1/*
   applicationConnectors:
     - type: https
       port: 8080
@@ -33,8 +33,8 @@ logging:
       threshold: ALL
       target: stdout
     - type: file
-      currentLogFilename: logs/web-api-skeleton.log
-      archivedLogFilenamePattern: logs/web-api-skeleton-%d.log.gz
+      currentLogFilename: logs/textbooks-api.log
+      archivedLogFilenamePattern: logs/textbooks-api-%d.log.gz
       archivedFileCount: 5
       threshold: ALL
       timeZone: PST
@@ -44,7 +44,7 @@ authentication:
     password: password
 
 api:
-  endpointUri: https://api.oregonstate.edu/v1/web-api-skeleton/
+  endpointUri: https://api.oregonstate.edu/v1/textbooks-api/
 
 textbooksApi:
   verbaCompareUri: http://osu.verbacompare.com/
