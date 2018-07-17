@@ -1,14 +1,17 @@
 package edu.oregonstate.mist.textbooksapi
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Optional
 
 import edu.oregonstate.mist.textbooksapi.core.Textbook
+import edu.oregonstate.mist.api.Resource
 
 import javax.ws.rs.core.UriBuilder
+import javax.ws.rs.core.Response
 
 import org.apache.http.HttpResponse
 import org.apache.http.HttpStatus
@@ -51,18 +54,8 @@ class TextbooksCollector {
 
         UriBuilder uriBuilder = UriBuilder.fromUri(booksUri)
         uriBuilder.queryParam("id", "${term}__${subject}__${courseNumber}__${section.get()}")
-
         def res = getResponse(uriBuilder.build())
-        String rawTextbooksString = EntityUtils.toString(res.getEntity())
-        List<RawTextbook> rawTextbooks
-        try {
-            rawTextbooks = objectMapper.readValue(
-                    rawTextbooksString,
-                    new TypeReference<List<RawTextbook>>() {}
-            )
-        } catch (JsonMappingException exception) {
-            throw new Exception(exception)
-        }
+        List<RawTextbook> rawTextbooks = getListFromResponse(res, RawTextbook.class)
         List<Textbook> textbooks = rawTextbooks.collect { refineTextbook(it) }
         textbooks
     }
@@ -81,16 +74,7 @@ class TextbooksCollector {
         uriBuilder.queryParam("id", "${department}")
 
         def res = getResponse(uriBuilder.build())
-        String coursesString = EntityUtils.toString(res.getEntity())
-        List<Course> courses
-        try {
-            courses = objectMapper.readValue(
-                    coursesString,
-                    new TypeReference<List<Course>>(){}
-            )
-        } catch (JsonMappingException exception) {
-            throw new Exception(exception)
-        }
+        List<Course> courses = getListFromResponse(res, Course.class)
         Course courseObject = courses.find { it.id == course }
         List<Textbook> textbooks = []
         courseObject?.sections?.each { section ->
@@ -116,26 +100,26 @@ class TextbooksCollector {
         Float usedPrice = null
         Float newPrice = null
         rawTextbook.offers.each {
-            if(it.condition == "new" && it.rental_days == null) {
+            if(it.condition == "new" && it.rentalDays == null) {
                 newPrice = Float.parseFloat(it.price)
-            } else if(it.condition == "used" && it.rental_days == null) {
+            } else if(it.condition == "used" && it.rentalDays == null) {
                 usedPrice = Float.parseFloat(it.price)
             }
         }
         Integer bookEdition
-        Integer copyrightYear
+        Integer copyrightYearInt
         rawTextbook.with {
             bookEdition = edition ? Integer.parseInt(edition) : null
-            copyrightYear = copyright_year ? Integer.parseInt(copyright_year) : null
+            copyrightYearInt = copyrightYear ? Integer.parseInt(copyrightYear) : null
         }
 
         new Textbook(
                 id: rawTextbook.isbn,
-                coverImageUrl: rawTextbook.cover_image_url,
+                coverImageUrl: rawTextbook.coverImageUrl,
                 title: rawTextbook.title,
                 author: rawTextbook.author,
                 edition: bookEdition,
-                copyrightYear: copyrightYear,
+                copyrightYear: copyrightYearInt,
                 priceNewUSD: newPrice,
                 priceUsedUSD: usedPrice
         )
@@ -163,16 +147,44 @@ class TextbooksCollector {
         }
         res
     }
+
+    Response validateTerm(String academicYear, String term) {
+        String termString = "${academicYear}-${term}"
+        def res = getResponse(coursesUri)
+        List<Term> termList = getListFromResponse(res, Term.class)
+        if(termList.find { it.id == termString }) {
+            null
+        } else {
+            Resource.badRequest("Invalid term: '${termString}'. Valid terms are [" +
+                    "${termList.id.join(", ")}]").build()
+        }
+    }
+
+    def getListFromResponse(HttpResponse res, Class objectType) {
+        String listString = EntityUtils.toString(res.getEntity())
+        def list
+        def listType = objectMapper.getTypeFactory().constructCollectionType(
+                List.class, objectType
+        )
+        try {
+            list = objectMapper.readValue(listString, listType)
+        } catch (JsonMappingException exception) {
+            throw new Exception(exception)
+        }
+        list
+    }
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 class RawTextbook {
     String isbn
-    String cover_image_url
+    @JsonProperty("cover_image_url")
+    String coverImageUrl
     String title
     String author
     String edition
-    String copyright_year
+    @JsonProperty("copyright_year")
+    String copyrightYear
     List<Offer> offers
 }
 
@@ -180,7 +192,8 @@ class RawTextbook {
 class Offer {
     String price
     String condition
-    String rental_days
+    @JsonProperty("rental_days")
+    String rentalDays
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -192,4 +205,9 @@ class Course {
 @JsonIgnoreProperties(ignoreUnknown = true)
 class Section {
     String name
+}
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+class Term {
+    String id
 }

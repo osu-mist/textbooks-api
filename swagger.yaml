@@ -33,6 +33,12 @@ paths:
       operationId: "getTextbooks"
       parameters:
 
+        - name: "academicYear"
+          in: "query"
+          description: "Year of term in which to find textbooks"
+          type: "string"
+          required: true
+
         - name: "term"
           in: "query"
           description: "Name of term in which to find textbooks"

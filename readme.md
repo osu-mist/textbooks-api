@@ -9,6 +9,17 @@ Allows users to retrieve information on textbooks for different classes.
 #### /textbooks
 
 Retrieve textbooks based on parameters.\
+
+Example request:
+```
+GET /textbooks
+    ?academicYear=2018
+    &term=Fall,
+    &subject=HST,
+    &courseNumber=101,
+    &section=001
+```
+
 Example response:
 ```json
 {

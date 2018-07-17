@@ -21,6 +21,7 @@ class TextbooksResourceTest {
             priceUsedUSD: 1.00
     )
     List<Textbook> textbookList = [textbook, textbook, textbook]
+    Closure validTermClosure = {String academicYear, String term -> null}
 
     // Test getTextbooks
 
@@ -29,7 +30,7 @@ class TextbooksResourceTest {
     void testAllArgs() {
         TextbooksCollector.metaClass.getTextbooks = getMockCollectorClosure(true)
         TextbooksResource resource = getTextbooksResource()
-        def res = resource.getTextbooks("Term", "AAA", "111", Optional.of("111"))
+        def res = resource.getTextbooks("2018", "Term", "AAA", "111", Optional.of("111"))
         validateResponse(res, 200, null, true)
     }
 
@@ -38,7 +39,7 @@ class TextbooksResourceTest {
     void testNoBooksFound() {
         TextbooksCollector.metaClass.getTextbooks = getMockCollectorClosure(false)
         TextbooksResource resource = getTextbooksResource()
-        def res = resource.getTextbooks("Term", "AAA", "111", Optional.of("111"))
+        def res = resource.getTextbooks("2018", "Term", "AAA", "111", Optional.of("111"))
         validateResponse(res, 200,  null, false)
         assert res.entity.data == []
     }
@@ -51,7 +52,7 @@ class TextbooksResourceTest {
         }
         TextbooksCollector.metaClass.getTextbooks = getMockCollectorClosure(true)
         TextbooksResource resource = getTextbooksResource()
-        def res = resource.getTextbooks("Term", "AAA", "111", Optional.absent())
+        def res = resource.getTextbooks("2018", "Term", "AAA", "111", Optional.absent())
         validateResponse(res, 200, null, true)
     }
 
@@ -63,9 +64,10 @@ class TextbooksResourceTest {
 
         // Test not using required fields
         def badRequests = [
-                resource.getTextbooks(null, "AAA", "111", Optional.of("111")),
-                resource.getTextbooks("Term", null, "111", Optional.of("111")),
-                resource.getTextbooks("Term", "AAA", null, Optional.of("111"))
+                resource.getTextbooks(null, "Term", "AAA", "111", Optional.of("111")),
+                resource.getTextbooks("2018", null, "AAA", "111", Optional.of("111")),
+                resource.getTextbooks("2018", "Term", null, "111", Optional.of("111")),
+                resource.getTextbooks("2018", "Term", "AAA", null, Optional.of("111"))
         ]
         badRequests.each {
             validateResponse(it, 400, "Query must contain", false)
@@ -73,10 +75,11 @@ class TextbooksResourceTest {
 
         // Test using invalid patterns in fields
         def badPatterns = [
-                resource.getTextbooks("(", "AAA", "111", Optional.of("111")),
-                resource.getTextbooks("Term", "(", "111", Optional.of("111")),
-                resource.getTextbooks("Term", "AAA", "(", Optional.of("111")),
-                resource.getTextbooks("Term", "AAA", "111", Optional.of("("))
+                resource.getTextbooks("(", "Term", "AAA", "111", Optional.of("111")),
+                resource.getTextbooks("2018", "(", "AAA", "111", Optional.of("111")),
+                resource.getTextbooks("2018", "Term", "(", "111", Optional.of("111")),
+                resource.getTextbooks("2018", "Term", "AAA", "(", Optional.of("111")),
+                resource.getTextbooks("2018", "Term", "AAA", "111", Optional.of("("))
         ]
         badPatterns.each {
             validateResponse(it, 400, "must match pattern", false)
@@ -120,6 +123,7 @@ class TextbooksResourceTest {
     }
 
     TextbooksResource getTextbooksResource() {
+        TextbooksCollector.metaClass.validateTerm = validTermClosure
         TextbooksCollector textbooksCollector = new TextbooksCollector(null, "")
         new TextbooksResource(textbooksCollector)
     }

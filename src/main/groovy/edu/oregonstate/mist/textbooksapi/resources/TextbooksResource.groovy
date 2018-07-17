@@ -40,13 +40,15 @@ class TextbooksResource extends Resource {
      * @return Response
      */
     @GET
-    Response getTextbooks(@QueryParam("term") String term,
+    Response getTextbooks(@QueryParam("academicYear") String academicYear,
+                          @QueryParam("term") String term,
                           @QueryParam("subject") String subject,
                           @QueryParam("courseNumber") String courseNumber,
                           @QueryParam("section") Optional<String> section) {
-        def params = [term: term, subject: subject, courseNumber: courseNumber]
+        def params = [academicYear: academicYear, term: term,
+                      subject: subject, courseNumber: courseNumber]
         def badResponse = null
-        params.findAll() { key, value ->
+        params.each { key, value ->
             if(!value) {
                 badResponse = badRequest("Query must contain ${key}").build()
             } else if(!(value ==~ validPattern)) {
@@ -59,8 +61,15 @@ class TextbooksResource extends Resource {
         if(section.isPresent() && !(section.get() ==~ validPattern)) {
             return badRequest("section must match pattern ${validPattern}").build()
         }
+        String termString
+        badResponse = textbooksCollector.validateTerm(academicYear, term)
+        if(badResponse) {
+            return badResponse
+        } else {
+            termString = "${academicYear}-${term}"
+        }
         List<Textbook> textbooks = textbooksCollector.getTextbooks(
-                term, subject, courseNumber, section
+                termString, subject, courseNumber, section
         )
         ok(textbooksResult(textbooks)).build()
     }
