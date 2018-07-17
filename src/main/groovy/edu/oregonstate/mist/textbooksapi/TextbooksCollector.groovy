@@ -76,16 +76,15 @@ class TextbooksCollector {
         def res = getResponse(uriBuilder.build())
         List<Course> courses = getListFromResponse(res, Course.class)
         Course courseObject = courses.find { it.id == course }
+
         List<Textbook> textbooks = []
         courseObject?.sections?.each { section ->
             List<Textbook> newBooks = getTextbooks(
                     term, department, course, Optional.of(section.name)
             )
-            newBooks.each { newBook ->
-                if (!textbooks.find { newBook.id == it.id }) {
-                    textbooks.add(newBook)
-                }
-            }
+            textbooks.addAll(newBooks.findAll { newBook ->
+                !textbooks.find { newBook.id == it.id }
+            })
         }
         textbooks
     }
@@ -112,10 +111,12 @@ class TextbooksCollector {
             bookEdition = edition ? Integer.parseInt(edition) : null
             copyrightYearInt = copyrightYear ? Integer.parseInt(copyrightYear) : null
         }
+        UriBuilder uriBuilder = UriBuilder.fromPath("http:")
+        uriBuilder.path(rawTextbook.coverImageUrl)
 
         new Textbook(
                 id: rawTextbook.isbn,
-                coverImageUrl: rawTextbook.coverImageUrl,
+                coverImageUrl: uriBuilder.build(),
                 title: rawTextbook.title,
                 author: rawTextbook.author,
                 edition: bookEdition,
