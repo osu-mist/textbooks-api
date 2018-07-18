@@ -25,33 +25,6 @@ produces:
 
 paths:
 
-  /textbooks/{id}:
-    get:
-      tags:
-      - "textbooks"
-      summary: "Retrieve textbooks by ID"
-      operationId: "getTextbooksById"
-      parameters:
-        - name: "id"
-          in: "path"
-          description: "Textbook ID"
-          required: true
-          type: "string"
-
-      responses:
-        200:
-          description: "Textbook successfully retrieved"
-          schema:
-            $ref: "#/definitions/TextbookResult"
-        404:
-          description: "Textbook not found"
-          schema:
-            $ref: "#/definitions/Error"
-        500:
-          description: "Internal server error"
-          schema:
-            $ref: "#/definitions/Error"
-
   /textbooks:
     get:
       tags:
@@ -59,6 +32,12 @@ paths:
       summary: "Retrieve textbooks by parameters"
       operationId: "getTextbooks"
       parameters:
+
+        - name: "academicYear"
+          in: "query"
+          description: "Year of term in which to find textbooks"
+          type: "string"
+          required: true
 
         - name: "term"
           in: "query"
@@ -84,12 +63,6 @@ paths:
           type: "string"
           required: false
 
-        - name: "isRequired"
-          in: "query"
-          description: "If true, only retrieves required textbooks. If false, only retrieves non-required textbooks."
-          type: "boolean"
-          required: false
-
       responses:
         200:
           description: "Textbooks successfully retrieved"
@@ -109,14 +82,6 @@ definitions:
   Textbook:
     type: "object"
     properties:
-      isbn:
-        type: "string"
-        description: "ISBN of textbook"
-        example: "9780998819112"
-      isRequired:
-        type: "boolean"
-        description: "Indicates whether textbook is required or not"
-        example: true
       coverImageUrl:
         type: "string"
         description: "URL of cover image"
@@ -133,7 +98,7 @@ definitions:
         type: "integer"
         description: "Textbook edition"
         example: 9
-      copyright_year:
+      copyrightYear:
         type: "integer"
         description: "Textbook copyright year"
         example: 2016
@@ -153,24 +118,16 @@ definitions:
     properties:
         id:
           type: "string"
-          description: "ID of textbook given by section id and textbook ISBN"
-          example: "2018-Fall-ST-314-002-9780998819112"
+          description: "ISBN of textbook"
+          example: "9780998819112"
         type:
           type: "string"
           default: "textbook"
         attributes:
           $ref: "#/definitions/Textbook"
         links:
-          $ref: "#/definitions/Links"
-
-  TextbookResult:
-    type: "object"
-    properties:
-      links:
-        type: "object"
-        default: null
-      data:
-        $ref: "#/definitions/TextbookResource"
+          type: "object"
+          default: null
 
   TextbookResultArray:
     type: "object"
@@ -182,15 +139,6 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/TextbookResource"
-
-  Links:
-    type: "object"
-    properties:
-      self:
-        type: "string"
-        format: "url"
-        description: "Self link of resource"
-        example: "https://api.oregonstate.edu/v1/textbooks/2018-Fall-ST-314-002-9780998819112"
 
   Error:
     type: "object"

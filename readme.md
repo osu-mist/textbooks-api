@@ -4,23 +4,62 @@ Allows users to retrieve information on textbooks for different classes.
 
 ## Endpoints
 
-### /textbooks/{id}
+### GET
 
-#### GET
+#### /textbooks
 
-Retrieve a textbook based on its id. Id contains section ID followed by ISBN of textbook.
+Retrieve textbooks based on parameters.\
 
-Example: `/textbooks/2018-Fall__ST__314__002__9780998819112`
+Example request:
+```
+GET /textbooks
+    ?academicYear=2018
+    &term=Fall,
+    &subject=HST,
+    &courseNumber=101,
+    &section=001
+```
 
-### /textbooks
-
-#### GET
-
-Retrieve textbooks based on parameters.
+Example response:
+```json
+{
+    "links": null,
+    "data": [
+        {
+            "id": "9780393265392",
+            "type": "textbook",
+            "attributes": {
+                "coverImageUrl": "//coverimages.verbacompete.com/425589bb-0f05-52c4-b6e9-964d849b9998.jpg",
+                "title": "Perspectives From The Past Vol 1",
+                "author": "Brophy",
+                "edition": 6,
+                "copyright_year": 2016,
+                "priceNewUSD": 40.5,
+                "priceUsedUSD": 30.5
+            },
+            "links": null
+        },
+        {
+            "id": "9780393650402",
+            "type": "textbook",
+            "attributes": {
+                "coverImageUrl": "//coverimages.verbacompete.com/no_image.jpg",
+                "title": "Western Civilization 19th Ed Vol 1 W/Perspectives From The Past 6th Ed Pkg",
+                "author": "Cole (2)",
+                "edition": null,
+                "copyright_year": null,
+                "priceNewUSD": 120.25,
+                "priceUsedUSD": null
+            },
+            "links": null
+        }
+    ]
+}
+```
 
 # Skeleton
 
-This project is based on the [Web API Skeleton](https://github.com/osu-mist/web-api-skeleton).
+This project is based on the [Web API Skeleton](https://github.com/osu-mist/web-api-skeleton). This section will cover information related to the skeleton required to run the API.
 
 ## Generate Keys
 
