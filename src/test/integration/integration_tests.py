@@ -13,7 +13,7 @@ class TestStringMethods(unittest.TestCase):
         # Missing required parameters
         required_params = ["academicYear", "term", "subject", "courseNumber"]
         for param in required_params:
-            test_missing_param(self, param, book_params, valid_params)
+            test_missing_param(self, param, valid_params)
 
         # Valid course
         book_params["section"] = None
@@ -51,7 +51,7 @@ def validate_response(self, res, code=None, res_type=None, message=None):
         self.assertIn(message, res.json()["developerMessage"])
 
 
-def test_missing_param(self, param, book_params, valid_params):
+def test_missing_param(self, param, valid_params):
     book_params[param] = None
     res = utils.get_textbooks(book_params)
     validate_response(self, res, 400,
@@ -59,11 +59,27 @@ def test_missing_param(self, param, book_params, valid_params):
     book_params[param] = valid_params[param]
 
 
+def set_course_data(subject):
+    terms = utils.get_courses(None)
+    term_id = terms.json()[0]["id"]
+    (valid_year, valid_term) = term_id.split("-")
+    courses = utils.get_courses({"term_id": term_id, "id": subject})
+    valid_course = courses.json()[0]["id"]
+    valid_section = courses.json()[0]["sections"][0]["name"]
+    global book_params
+    book_params = {
+        "academicYear": valid_year,
+        "term": valid_term,
+        "subject": subject,
+        "courseNumber": valid_course,
+        "section": valid_section
+    }
+
+
 if __name__ == "__main__":
     namespace, args = utils.parse_args()
     config = json.load(open(namespace.input_file))
     utils.set_local_vars(config)
     sys.argv = args
-    global book_params
-    book_params = config["valid_textbooks_parameters"]
+    set_course_data(config["valid_subject"])
     unittest.main()

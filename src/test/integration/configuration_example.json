@@ -12,11 +12,6 @@
         "username": "username",
         "password": "password"
     },
-    "valid_textbooks_parameters": {
-        "academicYear": "2018",
-        "term": "Fall",
-        "subject": "HST",
-        "courseNumber": "101",
-        "section": "001"
-    }
+    "valid_subject": "HST",
+    "verbacompare_url": "http://osu.verbacompare.com/compare"
 }

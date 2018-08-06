@@ -24,6 +24,9 @@ def set_local_vars(config):
     else:
         session.headers = get_oauth2_headers(config)
 
+    global verbacompare_url
+    verbacompare_url = config["verbacompare_url"]
+
 
 def get_oauth2_headers(config):
     token = "access_token"
@@ -41,6 +44,11 @@ def get_oauth2_headers(config):
 
 def get_textbooks(params=None):
     return session.get(url=url, params=params)
+
+
+def get_courses(params):
+    return requests.get(url=url_joiner((verbacompare_url, "courses")),
+                        params=params)
 
 
 def url_joiner(url_pieces):
