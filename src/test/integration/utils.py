@@ -40,10 +40,7 @@ def get_oauth2_headers(config):
 
 
 def get_textbooks(params=None):
-    return session.get(
-        url=url,
-        params=params
-    )
+    return session.get(url=url, params=params)
 
 
 def url_joiner(url_pieces):
