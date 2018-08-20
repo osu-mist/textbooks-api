@@ -2,7 +2,6 @@ package edu.oregonstate.mist.textbooksapi
 
 import edu.oregonstate.mist.api.Application
 import edu.oregonstate.mist.textbooksapi.resources.TextbooksResource
-
 import io.dropwizard.client.HttpClientBuilder
 import io.dropwizard.setup.Environment
 
@@ -20,8 +19,11 @@ class TextbooksApplication extends Application<TextbooksConfiguration> {
     void run(TextbooksConfiguration configuration, Environment environment) {
         this.setup(configuration, environment)
 
-        HttpClientBuilder httpClientBuilder = new HttpClientBuilder(environment)
+        // The Verbacompare url currently does not send its certificates in the right way
+        // so this system property allows intermediate certificates to be automatically downloaded
+        System.setProperty("com.sun.security.enableAIAcaIssuers", "true")
 
+        HttpClientBuilder httpClientBuilder = new HttpClientBuilder(environment)
         if(configuration.httpClient != null) {
             httpClientBuilder.using(configuration.httpClient)
         }
