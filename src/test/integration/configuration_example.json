@@ -1,0 +1,17 @@
+{
+    "hostname": "https://api.oregonstate.edu",
+    "version": "v1",
+    "api": "textbooks",
+    "use_basic_auth": false,
+    "ouath2": {
+        "token_api_url": "https://api.oregonstate.edu/oauth2/token",
+        "client_id": "client_id",
+        "client_secret": "client_secret"
+    },
+    "basic_auth": {
+        "username": "username",
+        "password": "password"
+    },
+    "valid_subject": "HST",
+    "verbacompare_url": "http://osu.verbacompare.com/compare"
+}
