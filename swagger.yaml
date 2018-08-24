@@ -35,33 +35,40 @@ paths:
 
         - name: "academicYear"
           in: "query"
-          description: "Year of term in which to find textbooks"
+          description: "4 digit year of term in which to find textbooks."
           type: "string"
           required: true
 
         - name: "term"
           in: "query"
-          description: "Name of term in which to find textbooks"
+          description: "Name of term in which to find textbooks. Example: 'Fall'"
           type: "string"
           required: true
 
         - name: "subject"
           in: "query"
-          description: "Name of course subject in which to find textbooks"
+          description: "Name of course subject in which to find textbooks. Example: 'CS'"
           type: "string"
           required: true
 
         - name: "courseNumber"
           in: "query"
-          description: "Number of course in which to find textbooks"
+          description: "Number of course in which to find textbooks. Example: '161'"
           type: "string"
           required: true
 
         - name: "section"
           in: "query"
-          description: "Name of section in which to find textbooks"
+          description: "Name of section in which to find textbooks. Example: '001'"
           type: "string"
           required: false
+
+        - name: "Authorization"
+          in: "header"
+          description: "Specify 'Bearer' and your access token."
+          type: "string"
+          required: true
+
 
       responses:
         200:
