@@ -1,30 +1,21 @@
 swagger: "2.0"
-
 info:
   description: "This API allows users to view information on textbooks associated with course sections."
   version: "1.0"
   title: "Textbooks API"
-
 tags:
-- name: "textbooks"
-  description: "Contains information on textbooks"
-
+  - name: "textbooks"
+    description: "Contains information on textbooks"
 schemes:
-- "https"
-
+  - "https"
 host: "api.oregonstate.edu"
-
 basePath: "/v1"
-
 externalDocs:
   description: "GitHub Repository"
   url: "https://github.com/osu-mist/textbooks-api"
-
 produces:
   - "application/json"
-
 paths:
-
   /textbooks:
     get:
       tags:
@@ -32,44 +23,32 @@ paths:
       summary: "Retrieve textbooks by parameters"
       operationId: "getTextbooks"
       parameters:
-
         - name: "academicYear"
           in: "query"
           description: "4 digit year of term in which to find textbooks."
           type: "string"
           required: true
-
         - name: "term"
           in: "query"
           description: "Name of term in which to find textbooks. Example: 'Fall'"
           type: "string"
           required: true
-
         - name: "subject"
           in: "query"
           description: "Name of course subject in which to find textbooks. Example: 'CS'"
           type: "string"
           required: true
-
         - name: "courseNumber"
           in: "query"
           description: "Number of course in which to find textbooks. Example: '161'"
           type: "string"
           required: true
-
         - name: "section"
           in: "query"
           description: "Name of section in which to find textbooks. Example: '001'"
           type: "string"
           required: false
-
-        - name: "Authorization"
-          in: "header"
-          description: "Specify 'Bearer' and your access token."
-          type: "string"
-          required: true
-
-
+        - $ref: '#/parameters/authorization'
       responses:
         200:
           description: "Textbooks successfully retrieved"
@@ -83,9 +62,14 @@ paths:
           description: "Internal server error"
           schema:
             $ref: "#/definitions/Error"
-
+parameters:
+  authorization:
+    name: Authorization
+    in: header
+    type: string
+    required: true
+    description: '"Bearer [token]" where [token] is your OAuth2 access token'
 definitions:
-
   Textbook:
     type: "object"
     properties:
@@ -119,7 +103,6 @@ definitions:
         format: "float"
         description: "Price to buy used textbook at Beaver Store"
         example: 36.75
-
   TextbookResource:
     type: "object"
     properties:
@@ -135,7 +118,6 @@ definitions:
         links:
           type: "object"
           default: null
-
   TextbookResultArray:
     type: "object"
     properties:
@@ -146,7 +128,6 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/TextbookResource"
-
   Error:
     type: "object"
     properties:
