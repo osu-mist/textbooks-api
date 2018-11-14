@@ -1,9 +1,11 @@
 package edu.oregonstate.mist.textbooksapi
 
 import edu.oregonstate.mist.api.Application
+import edu.oregonstate.mist.textbooksapi.health.TextbooksHealthCheck
 import edu.oregonstate.mist.textbooksapi.resources.TextbooksResource
 import io.dropwizard.client.HttpClientBuilder
 import io.dropwizard.setup.Environment
+import org.apache.http.client.HttpClient
 
 /**
  * Main application class.
@@ -27,10 +29,15 @@ class TextbooksApplication extends Application<TextbooksConfiguration> {
         if(configuration.httpClient != null) {
             httpClientBuilder.using(configuration.httpClient)
         }
+        HttpClient httpClient = httpClientBuilder.build()
 
         TextbooksCollector textbooksCollector = new TextbooksCollector(
-                httpClientBuilder.build(), configuration.textbooksApi.verbaCompareUri
+                httpClient, configuration.textbooksApi.verbaCompareUri
         )
+        TextbooksHealthCheck textbooksHealthCheck = new TextbooksHealthCheck(
+                httpClient, configuration.textbooksApi.verbaCompareUri
+        )
+        environment.healthChecks().register("TextbooksHealthCheck", textbooksHealthCheck)
 
         environment.jersey().register(new TextbooksResource(textbooksCollector))
     }
