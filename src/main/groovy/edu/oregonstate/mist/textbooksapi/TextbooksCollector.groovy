@@ -131,6 +131,7 @@ class TextbooksCollector {
      */
     HttpResponse getResponse(URI uri) {
         HttpGet req = new HttpGet(uri)
+        logger.info("Sending a request to $uri")
         HttpResponse res = httpClient.execute(req)
         int status = res.getStatusLine().getStatusCode()
 
@@ -141,6 +142,7 @@ class TextbooksCollector {
             Requested URI: ${uri}.
             HTTP response code: ${status}\
             """.stripIndent())
+            EntityUtils.consumeQuietly(res.entity)
             throw new Exception("Something went wrong with Verba compare request")
         }
         res
