@@ -6,6 +6,7 @@ import org.apache.http.HttpResponse
 import org.apache.http.HttpStatus
 import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.HttpGet
+import org.apache.http.util.EntityUtils
 
 import javax.ws.rs.core.UriBuilder
 
@@ -22,6 +23,7 @@ class TextbooksHealthCheck extends HealthCheck {
     protected Result check() throws Exception {
         HttpGet req = new HttpGet(coursesURI)
         HttpResponse res = httpClient.execute(req)
+        EntityUtils.consumeQuietly(res.entity)
         int status = res.getStatusLine().getStatusCode()
 
         if (status == HttpStatus.SC_OK) {
