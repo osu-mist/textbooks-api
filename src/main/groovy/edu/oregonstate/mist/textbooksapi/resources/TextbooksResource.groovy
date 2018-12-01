@@ -1,11 +1,11 @@
 package edu.oregonstate.mist.textbooksapi.resources
 
 import com.google.common.base.Optional
-
 import edu.oregonstate.mist.api.Resource
 import edu.oregonstate.mist.api.jsonapi.ResourceObject
 import edu.oregonstate.mist.api.jsonapi.ResultObject
 import edu.oregonstate.mist.textbooksapi.TextbooksCollector
+import edu.oregonstate.mist.textbooksapi.VerbaCompareDownException
 import edu.oregonstate.mist.textbooksapi.core.Textbook
 
 import java.util.regex.Pattern
@@ -62,7 +62,15 @@ class TextbooksResource extends Resource {
             return badRequest("section must match pattern ${validPattern}").build()
         }
         String termString = "${academicYear}-${term}"
-        def validTerms = textbooksCollector.getValidTerms()
+
+        Map<String, List<String>> validTerms
+
+        try {
+            validTerms = textbooksCollector.getValidTerms()
+        } catch(VerbaCompareDownException e) {
+            return internalServerError("Textbooks datasource is unavailable.").build()
+        }
+
         if(!validTerms.find { year, terms -> year == academicYear && terms.contains(term) }) {
             def validCombinations = []
             validTerms.each { year, singleTerm ->

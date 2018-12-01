@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Optional
 
 import edu.oregonstate.mist.textbooksapi.core.Textbook
+import groovy.transform.InheritConstructors
 
 import javax.ws.rs.core.UriBuilder
 
@@ -153,6 +154,13 @@ class TextbooksCollector {
         List<Term> termList = getListFromResponse(res, Term.class)
         Map<String, List<String>> mappedTerms = [:]
         termList.each {
+            // Sometimes verbacompare will respond with a 200 and the normal JSON structure, but the
+            // values in the JSON body will indicate the service is down or in maintenance mode.
+            String lowerCaseID = it.id.toLowerCase()
+            if(lowerCaseID.contains("database") || lowerCaseID.contains("down")) {
+                throw new VerbaCompareDownException("API response indicates database is down.")
+            }
+
             def (String year, String term) = it.id.split("-")
             if(mappedTerms.containsKey(year)) {
                 mappedTerms[year].add(term)
@@ -177,6 +185,9 @@ class TextbooksCollector {
         list
     }
 }
+
+@InheritConstructors
+class VerbaCompareDownException extends Exception {}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 class RawTextbook {
