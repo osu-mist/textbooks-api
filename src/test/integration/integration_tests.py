@@ -61,19 +61,25 @@ def test_missing_param(self, param, valid_params):
 
 def set_course_data(subject):
     terms = utils.get_courses(None)
-    term_id = terms.json()[0]["id"]
-    (valid_year, valid_term) = term_id.split("-")
-    courses = utils.get_courses({"term_id": term_id, "id": subject})
-    valid_course = courses.json()[0]["id"]
-    valid_section = courses.json()[0]["sections"][0]["name"]
-    global book_params
-    book_params = {
-        "academicYear": valid_year,
-        "term": valid_term,
-        "subject": subject,
-        "courseNumber": valid_course,
-        "section": valid_section
-    }
+    for term in terms.json():
+        term_id = term["id"]
+        (valid_year, valid_term) = term_id.split("-")
+        courses = utils.get_courses({"term_id": term_id, "id": subject})
+        for course in courses.json():
+            valid_course = course["id"]
+            if course["sections"]:
+                valid_section = course["sections"][0]["name"]
+                global book_params
+                book_params = {
+                    "academicYear": valid_year,
+                    "term": valid_term,
+                    "subject": subject,
+                    "courseNumber": valid_course,
+                    "section": valid_section
+                }
+                return
+
+    exit("No data was found")
 
 
 if __name__ == "__main__":
