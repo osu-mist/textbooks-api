@@ -2,6 +2,7 @@ import json
 import sys
 import unittest
 import utils
+import random
 from copy import deepcopy
 
 
@@ -61,14 +62,21 @@ def test_missing_param(self, param, valid_params):
 
 def set_course_data(subject):
     terms = utils.get_courses(None)
+    # Nested for loop to loop through each term, and each course, to return
+    # the first valid term, course, and a random section ther is
     for term in terms.json():
         term_id = term["id"]
         (valid_year, valid_term) = term_id.split("-")
         courses = utils.get_courses({"term_id": term_id, "id": subject})
+        # looping through each course in the term.
         for course in courses.json():
             valid_course = course["id"]
+            # if sections is empty loop agian to find a course
+            # with a valid section
             if course["sections"]:
-                valid_section = course["sections"][0]["name"]
+                # include a random section in the response
+                random_section = random.randint(0, len(course["sections"]) - 1)
+                valid_section = course["sections"][random_section]["name"]
                 global book_params
                 book_params = {
                     "academicYear": valid_year,
@@ -77,9 +85,12 @@ def set_course_data(subject):
                     "courseNumber": valid_course,
                     "section": valid_section
                 }
+                # if a valid term, course and section was found,
+                # exit the function with return. Otherwise loop again
                 return
 
-    exit("No data was found")
+    # if this line was excuted that means there was nothing found in the loop.
+    exit("No valid courses were found for this search")
 
 
 if __name__ == "__main__":
