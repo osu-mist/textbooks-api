@@ -2,6 +2,7 @@ import json
 import sys
 import unittest
 import utils
+import random
 from copy import deepcopy
 
 
@@ -61,19 +62,35 @@ def test_missing_param(self, param, valid_params):
 
 def set_course_data(subject):
     terms = utils.get_courses(None)
-    term_id = terms.json()[0]["id"]
-    (valid_year, valid_term) = term_id.split("-")
-    courses = utils.get_courses({"term_id": term_id, "id": subject})
-    valid_course = courses.json()[0]["id"]
-    valid_section = courses.json()[0]["sections"][0]["name"]
-    global book_params
-    book_params = {
-        "academicYear": valid_year,
-        "term": valid_term,
-        "subject": subject,
-        "courseNumber": valid_course,
-        "section": valid_section
-    }
+    # Nested for loop to loop through each term, and each course, to return
+    # the first valid term, course, and a random section
+    for term in terms.json():
+        term_id = term["id"]
+        (valid_year, valid_term) = term_id.split("-")
+        courses = utils.get_courses({"term_id": term_id, "id": subject})
+        # looping through each course in the term.
+        for course in courses.json():
+            valid_course = course["id"]
+            # if sections is empty, then loop again to find a course
+            # with a valid section
+            if course["sections"]:
+                # include a random section in the response
+                random_section = random.sample(course["sections"], 1)
+                valid_section = course["sections"][random_section]["name"]
+                global book_params
+                book_params = {
+                    "academicYear": valid_year,
+                    "term": valid_term,
+                    "subject": subject,
+                    "courseNumber": valid_course,
+                    "section": valid_section
+                }
+                # if a valid term, course and section was found,
+                # exit the function with return. Otherwise loop again
+                return
+
+    # if this line was executed that means there was nothing found in the loop.
+    exit("No valid courses were found for this search")
 
 
 if __name__ == "__main__":
