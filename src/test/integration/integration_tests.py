@@ -76,7 +76,7 @@ def set_course_data(subject):
             if course["sections"]:
                 # include a random section in the response
                 random_section = random.sample(course["sections"], 1)
-                valid_section = course["sections"][random_section]["name"]
+                valid_section = random_section[0]["name"]
                 global book_params
                 book_params = {
                     "academicYear": valid_year,
