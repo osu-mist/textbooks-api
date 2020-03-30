@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  description: "This API allows users to view information on textbooks associated with course sections."
+  description: Get information about textbooks used for different course sections.
   version: "1.0"
   title: "Textbooks API"
 tags:
@@ -15,6 +15,9 @@ externalDocs:
   url: "https://github.com/osu-mist/textbooks-api"
 produces:
   - "application/json"
+security:
+  - OAuth2:
+    - full
 paths:
   /textbooks:
     get:
@@ -48,7 +51,6 @@ paths:
           description: "Name of section in which to find textbooks. Example: '001'"
           type: "string"
           required: false
-        - $ref: '#/parameters/authorization'
       responses:
         200:
           description: "Textbooks successfully retrieved"
@@ -62,13 +64,13 @@ paths:
           description: "Internal server error"
           schema:
             $ref: "#/definitions/Error"
-parameters:
-  authorization:
-    name: Authorization
-    in: header
-    type: string
-    required: true
-    description: '"Bearer [token]" where [token] is your OAuth2 access token'
+securityDefinitions:
+  OAuth2:
+    type: oauth2
+    flow: application
+    tokenUrl: https://api.oregonstate.edu/oauth2/token
+    scopes:
+      full: Full access to the API
 definitions:
   Textbook:
     type: "object"
